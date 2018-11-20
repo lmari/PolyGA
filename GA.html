@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GA</title>
+<link rel="stylesheet" href="jquery-ui.min.css">
+<script src="jquery-3.3.1.min.js"></script>
+<script src="Chart.bundle.min.js"></script>
+<script src="utils.js"></script>
+</head>
+<body>
+<h1>GA</h1>
+<div style="position:absolute; top:200px; left:10px; width:600px; height:500px;">
+    <canvas id="myCanvas" style="border:2px solid #FF9933;"></canvas>
+</div>
+<div id="myText" style="position:absolute; top:500px; left:10px;">...</div>
+
+numPts: <input type="textbox" id="tNumPts" size="1"></input>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+numSrs: <input type="textbox" id="tNumSrs" size="1"></input>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" id="cShowData">Show param/coords
+<p>
+combin %: <input type="textbox" id="tCombin" size="1"></input>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+change %: <input type="textbox" id="tChange" size="1"></input>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+introd %: <input type="textbox" id="tIntrod" size="1"></input>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button id="bSet">Set</button>
+<p>
+<button id="bSelect">Select</button>
+<button id="bRemove">Remove</button>
+<button id="bUpdate">Update</button>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button id="bStart">Start</button>
+<button id="bStop">Stop</button>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button id="bChange">Change params</button>
+<button id="bReset">Reset target</button>
+
+<script>
+var defNumPts = 3; //default
+var defNumSrs = 3; //default
+var defCombin = 10; //default
+var defChange = 10; //default
+var defIntrod = 10; //default
+
+var numPts = defNumPts;
+$('#tNumPts').val(numPts);
+var numSrs = defNumSrs;
+$('#tNumSrs').val(numSrs);
+var tempNumSrs = numSrs;
+var showData = true;
+$('#cShowData').prop('checked', showData);
+var combin = defCombin;
+$('#tCombin').val(combin);
+var change = defChange;
+$('#tChange').val(change);
+var introd = defIntrod;
+$('#tIntrod').val(introd);
+
+function changeParams() {
+  combin = $('#tCombin').val();
+  if(!Number.isInteger(parseInt(combin)) || combin < 0 || combin > 50) { $('#tCombin').val(combin = defCombin); }
+  change = $('#tChange').val();
+  if(!Number.isInteger(parseInt(change)) || change < 0 || change > 100) { $('#tChange').val(change = defChange); }
+  introd = $('#tIntrod').val();
+  if(!Number.isInteger(parseInt(introd)) || introd < 0 || introd > 100) { $('#tIntrod').val(introd = defIntrod); }
+}
+
+$('#bSet').click(function () {
+  numPts = $('#tNumPts').val();
+  if(!Number.isInteger(parseInt(numPts)) || numPts < 2 || numPts > 20) { $('#tNumPts').val(numPts = defNumPts); }
+	tempNumSrs = numSrs = $('#tNumSrs').val();
+  if(!Number.isInteger(parseInt(numSrs)) || numSrs < 1 || numSrs > 20) { $('#tNumSrs').val(tempNumSrs = numSrs = defNumSrs); }
+  changeParams();
+  setAll();
+});
+
+$('#bChange').click(function () { changeParams(); });
+
+$('#cShowData').click(function () {
+  showData = $('#cShowData').prop('checked');
+  writeData("#myText");
+});
+
+$('#bSelect').click(function () { selectFit(); });
+$('#bRemove').click(function () { removeUnfit(); });
+$('#bUpdate').click(function () { updateSrs(); });
+$('#bStart').click(function () { startProcess(); });
+$('#bStop').click(function () { stopProcess(); });
+$('#bReset').click(function () { resetTarget(true); });
+
+var ctx = $("#myCanvas");
+
+setAll();
+</script>
+</body>
+</html>
