@@ -4,3 +4,7 @@ It exploits <a href="https://www.chartjs.org/">chart.js</a> and <a href="https:/
 
 Run it <a href="http://htmlpreview.github.io/?https://github.com/lmari/GA/blob/master/GA.html" target="_blank">here</a>.
 
+This is a short explanation of what can be set up via the control panel of the application.
+* numPts (from 2 to 20): number of genes = number of points of the polynomials = number of parameters of the polynomials = 1 + order of the polynomials
+* ...
+* ...
