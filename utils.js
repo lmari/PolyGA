@@ -218,7 +218,7 @@ function updateSrs() {
   // introd == 0<=x<=100: percentage of immigrants, i.e., brand new random individuals
   var c1 = combin / 100;
   var c2 = change / 100;
-  var changeAmpl = 0.05; //amplitude of mutation
+  var changeAmpl = chang2 / 100; //amplitude of mutation
   var parentIndexes = new Array();
   var num = numSrs - numDel;
   for(var j = 0; j < num; j++) { parentIndexes.push(j); }
