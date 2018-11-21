@@ -1,78 +1,93 @@
+<!--
+This file is part of PolyGA, Copyright 2018, Luca Mari.
+
+PolyGA is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 2.
+
+PolyGA is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License <http://www.gnu.org/licenses/> for more details.
+-->
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Genetic Algorithm: un example</title>
+<title>PolyGA</title>
 <link rel="stylesheet" href="jquery-ui.min.css">
 <script src="res/jquery-3.3.1.min.js"></script>
 <script src="res/Chart.bundle.min.js"></script>
 <script src="utils.js"></script>
 </head>
 <body>
-<h1>Genetic Algorithm: un example</h1>
-<div style="position:absolute; top:200px; left:10px; width:600px; height:500px;">
+<h1>PolyGA: an example of Genetic Algorithm
+<a href="javascript:window.alert('Luca Mari, 2018');">[?]</a>
+</h1>
+<div style="position:absolute; top:300px; left:10px; width:600px; height:500px;">
     <canvas id="myCanvas" style="border:2px solid #FF9933;"></canvas>
 </div>
-<div id="myText" style="position:absolute; top:500px; left:10px;">...</div>
+<div id="myText" style="position:absolute; top:600px; left:10px;">...</div>
 
-numPts: <input type="textbox" id="tNumPts" size="1"></input>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-numSrs: <input type="textbox" id="tNumSrs" size="1"></input>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<input type="checkbox" id="cShowData">Show param/coords
-<p>
-combin %: <input type="textbox" id="tCombin" size="1"></input>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-change %: <input type="textbox" id="tChange" size="1"></input>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-introd %: <input type="textbox" id="tIntrod" size="1"></input>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<button id="bSet">Set</button>
-<p>
-<button id="bSelect">Select</button>
+<b>Set up</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# genes/points: <input type="textbox" id="tNumPts" size="1"></input>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# individuals/test polynomials: <input type="textbox" id="tNumSrs" size="1"></input>
+
+<p><b>Selection</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# killed/deleted: <input type="textbox" id="tNumDel" size="1"></input>
+
+<p><b>Generation</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+% crossover/combination: <input type="textbox" id="tCombin" size="1"></input>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+% mutation/change: <input type="textbox" id="tChange" size="1"></input>
+
+<p><b>Immigration</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# new individuals/new polynomials: <input type="textbox" id="tNumNew" size="1"></input>
+
+<p><button id="bSet">Set all</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button id="bChange">Change Sel/Gen/Imm params</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
+<button id="bReset">Reset target</button>
+
+<p><button id="bSelect">Select</button>
 <button id="bRemove">Remove</button>
 <button id="bUpdate">Update</button>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <button id="bStart">Start</button>
-<button id="bStop">Stop</button>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<button id="bChange">Change params</button>
-<button id="bReset">Reset target</button>
+<button id="bStop">Stop</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<input type="checkbox" id="cShowData">Show params
 
 <script>
-var defNumPts = 3; //default
-var defNumSrs = 3; //default
-var defCombin = 10; //default
-var defChange = 10; //default
-var defIntrod = 10; //default
+//defaults
+var defNumPts = 3;
+var defNumSrs = 3;
+var defNumDel = 1;
+var defCombin = 10;
+var defChange = 10;
+var defNumNew = 1;
 
-var numPts = defNumPts;
-$('#tNumPts').val(numPts);
-var numSrs = defNumSrs;
-$('#tNumSrs').val(numSrs);
-var tempNumSrs = numSrs;
-var showData = true;
-$('#cShowData').prop('checked', showData);
-var combin = defCombin;
-$('#tCombin').val(combin);
-var change = defChange;
-$('#tChange').val(change);
-var introd = defIntrod;
-$('#tIntrod').val(introd);
+var numPts, numSrs, numDel, combin, change, numNew, showData;
+$('#tNumPts').val(numPts = defNumPts);
+$('#tNumSrs').val(numSrs = defNumSrs);
+$('#tNumDel').val(numDel = defNumDel);
+$('#tCombin').val(combin = defCombin);
+$('#tChange').val(change = defChange);
+$('#tNumNew').val(numNew = defNumNew);
+$('#cShowData').prop('checked', showData = true);
 
 function changeParams() {
+  numDel = $('#tNumDel').val();
+  if(!checkRange(numDel, 0, numSrs)) { $('#tNumDel').val(numDel = defNumDel); }
   combin = $('#tCombin').val();
-  if(!Number.isInteger(parseInt(combin)) || combin < 0 || combin > 50) { $('#tCombin').val(combin = defCombin); }
+  if(!checkRange(combin, 0, 50)) { $('#tCombin').val(combin = defCombin); }
   change = $('#tChange').val();
-  if(!Number.isInteger(parseInt(change)) || change < 0 || change > 100) { $('#tChange').val(change = defChange); }
-  introd = $('#tIntrod').val();
-  if(!Number.isInteger(parseInt(introd)) || introd < 0 || introd > 100) { $('#tIntrod').val(introd = defIntrod); }
+  if(!checkRange(change, 0, 100)) { $('#tChange').val(change = defChange); }
+  numNew = $('#tNumNew').val();
+  if(!checkRange(numNew, 0, numSrs)) { $('#tnumNew').val(numNew = defNumNew); }
 }
 
 $('#bSet').click(function () {
   numPts = $('#tNumPts').val();
-  if(!Number.isInteger(parseInt(numPts)) || numPts < 2 || numPts > 20) { $('#tNumPts').val(numPts = defNumPts); }
-	tempNumSrs = numSrs = $('#tNumSrs').val();
-  if(!Number.isInteger(parseInt(numSrs)) || numSrs < 1 || numSrs > 20) { $('#tNumSrs').val(tempNumSrs = numSrs = defNumSrs); }
+  if(!checkRange(numPts, 2, 20)) { $('#tNumPts').val(numPts = defNumPts); }
+	numSrs = $('#tNumSrs').val();
+  if(!checkRange(numSrs, 1, 20)) { $('#tNumSrs').val(numSrs = defNumSrs); }
   changeParams();
   setAll();
 });
@@ -81,7 +96,7 @@ $('#bChange').click(function () { changeParams(); });
 
 $('#cShowData').click(function () {
   showData = $('#cShowData').prop('checked');
-  writeData("#myText");
+  writeData("#myText", false, true);
 });
 
 $('#bSelect').click(function () { selectFit(); });

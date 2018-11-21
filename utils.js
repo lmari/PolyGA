@@ -1,3 +1,15 @@
+/*
+This file is part of PolyGA, Copyright 2018, Luca Mari.
+
+PolyGA is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 2.
+
+PolyGA is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License <http://www.gnu.org/licenses/> for more details.
+*/
 Array.prototype.toString = function(n) {
   var res = '';
   for(var i = 0; i < this.length; i++) {
@@ -12,10 +24,16 @@ Array.prototype.remove = function(from, to) {
   return this.push.apply(this, rest);
 };
 
-var xData, pTarg, yTarg, pData, yData, MSEs, sortedMSEs, median, minTarg, maxTarg, chart;
+function checkRange(what, from, to) {
+  var n = parseInt(what);
+  return !(!Number.isInteger(n) || (n < from) || (n > to));
+}
+
+var xData, pTarg, yTarg, pData, yData, MSEs, sortedMSEs, median, lastFit, minTarg, maxTarg, chart;
 var selectedAsUnfit = new Array();
 
-function writeData(field, withHighlight) {
+function writeData(field, withHighlight, wholePop) { //write some data
+  var num = wholePop ? numSrs : numSrs - numDel;
   var txt = '<h3>num gen: ' + numGen;
   txt += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;median MSE: ' + median.toFixed(3);
   txt += '</h3>';
@@ -24,36 +42,35 @@ function writeData(field, withHighlight) {
     txt += 'target (params): ' + pTarg.toString(3) + '<br>';
     //txt += 'target (coords): ' + yTarg.toString(3) + '<br>';
     if(!withHighlight) {
-      for(var j = 0; j < tempNumSrs; j++) {
+      for(var j = 0; j < num; j++) {
         txt += 'y[' + j + '] (params): ' + pData[j].toString(3) + '<br>';
         //txt += 'y[' + j + '] (coords): ' + yData[j].toString(3) + '<br>';
       }
       txt += '<br>MSEs: ';
-      for(var j = 0; j < tempNumSrs; j++) { txt += MSEs[j].toFixed(3) + ' '; }
-      txt += '<br>sorted RMSEs: ';
-      for(var j = 0; j < tempNumSrs; j++) { txt += sortedMSEs[j].toFixed(3) + ' '; }
+      for(var j = 0; j < num; j++) { txt += MSEs[j].toFixed(3) + ' '; }
+      txt += '<br>sorted MSEs: ';
+      for(var j = 0; j < num; j++) { txt += sortedMSEs[j].toFixed(3) + ' '; }
     } else {
-      for(var j = 0; j < tempNumSrs; j++) {
+      for(var j = 0; j < num; j++) {
         if(selectedAsUnfit.includes(j)) { txt += '<b>'; }
         txt += 'y[' + j + '] (params): ' + pData[j].toString(3) + '<br>';
         //txt += 'y[' + j + '] (coords): ' + yData[j].toString(3) + '<br>';
         if(selectedAsUnfit.includes(j)) { txt += '</b>'; }
       }
       txt += '<br>MSEs: ';
-      for(var j = 0; j < tempNumSrs; j++) {
+      for(var j = 0; j < num; j++) {
         if(selectedAsUnfit.includes(j)) { txt += '<b>'; }
         txt += MSEs[j].toFixed(3) + ' ';
         if(selectedAsUnfit.includes(j)) { txt += '</b>'; }
       }
       txt += '<br>sorted MSEs: ';
-      for(var j = 0; j < tempNumSrs; j++) { txt += sortedMSEs[j].toFixed(3) + ' '; }
+      for(var j = 0; j < num; j++) { txt += sortedMSEs[j].toFixed(3) + ' '; }
     }
   }
-
   $(field).html(txt);
 }
 
-function resetTarget(refresh) {
+function resetTarget(refresh) { //(re)set the target polynomial: x coords, params, y coords
   xData = new Array(); //x coords of world
   pTarg = new Array(); //params of target series
   yTarg = new Array(); //y coords of target series
@@ -71,11 +88,11 @@ function resetTarget(refresh) {
   if(refresh) {
     computeMSEs();
     setChartData();
-    writeData("#myText");
+    writeData("#myText", false, true);
   }
 }
 
-function setData() {
+function setData() { //(re)set the population polynomials: params, y coords
   pData = new Array(); //params of test series
   yData = new Array(); //y coords of test series
   for(var j = 0; j < numSrs; j++) {
@@ -149,13 +166,14 @@ function setAll() {
   setData();
   computeMSEs();
   setChartData();
-  writeData("#myText");
+  writeData("#myText", false, true);
 }
 
 function selectFit() {
   selectedAsUnfit = new Array();
+  lastFit = sortedMSEs[numSrs - numDel - 1];
   for(var j = 0; j < numSrs; j++) {
-    if(MSEs[j] <= median) {
+    if(MSEs[j] <= lastFit) {
       chart.data.datasets[j+1].borderColor = 'rgb(0, 0, 255)';
     } else {
       selectedAsUnfit.push(j);
@@ -163,26 +181,30 @@ function selectFit() {
       chart.data.datasets[j+1].borderDash = [5, 5];
     }
     chart.update();
-    writeData("#myText", true);
+    writeData("#myText", true, true);
   }
 }
 
 function removeUnfit() {
   for(var j = numSrs-1; j >= 0; j--) {
-    if(MSEs[j] > median) {
+    if(MSEs[j] > lastFit) {
       chart.data.datasets.remove(j+1);
       pData.remove(j);
       yData.remove(j);
       MSEs.remove(j);
-      tempNumSrs--;
     } else {
       chart.data.datasets[j+1].borderColor = 'rgb(255, 99, 132)';
     }
   }
-  var m = tempNumSrs % 2 == 0 ? tempNumSrs / 2 - 1 : (tempNumSrs - 1) / 2;
-  median = sortedMSEs[m];
+  var num = numSrs - numDel;
+  if(num > 0) {
+    var m = num % 2 == 0 ? num / 2 - 1 : (num - 1) / 2;
+    median = sortedMSEs[m];
+  } else {
+    median = 0;
+  }
   chart.update();
-  writeData("#myText");
+  writeData("#myText", false, false);
   selectedAsUnfit = new Array();
 }
 
@@ -198,14 +220,13 @@ function updateSrs() {
   var c2 = change / 100;
   var changeAmpl = 0.05; //amplitude of mutation
   var parentIndexes = new Array();
-  if(tempNumSrs > 1) {
-    for(var j = 0; j < tempNumSrs; j++) { parentIndexes.push(j); }
-  }
+  var num = numSrs - numDel;
+  for(var j = 0; j < num; j++) { parentIndexes.push(j); }
   for(var j = 0; j < numSrs; j++) {
     pData[j] = new Array();
-    if(j < numSrs * (100 - introd) / 100) { //offspring from parents
+    if(j < (numSrs - numNew)) { //offspring from parents
       var r1, r2;
-      if(tempNumSrs == 1) {
+      if(num == 1) {
         r1 = r2 = 0;
       } else {
         parentIndexes.sort(() => { return 0.5 - Math.random(); });
@@ -222,10 +243,9 @@ function updateSrs() {
   }
   computeSeries();
   computeMSEs();
-  tempNumSrs = numSrs;
   setChartData()
   chart.update();
-  writeData("#myText");
+  writeData("#myText", false, true);
 }
 
 var funId = -99;
