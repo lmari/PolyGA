@@ -12,3 +12,5 @@ This is a short explanation of what can be set up via the control panel of the a
 * _%mutation_ (integer from 0 to 100): probability * 100 of mutations / of parameter change, where 0 means that no genes are submitted to mutation and 100 means that all genes are submitted to mutation
 * _ampl mutation_ (integer from 0 to 100): relative amplitude of mutations / of parameter change
 * _#new individuals_ (integer from 0 to #individuals): number of immigrants in each generation / of new random polynomials
+
+A presentation about Genetic Algorithms in Italian is <a href="https://github.com/lmari/GA/blob/master/GA.pdf">here</a>.
