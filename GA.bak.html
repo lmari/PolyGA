@@ -1,5 +1,5 @@
 <!--
-This file is part of PolyGA, made by Luca Mari, 2018-2019.
+This file is part of PolyGA, made by Luca Mari, 2018.
 
 PolyGA is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@ See the GNU General Public License <http://www.gnu.org/licenses/> for more detai
 <html>
 <head>
 <script>
-var rem = "PolyGA, made by Luca Mari, 2018-2019.";
+var rem = "PolyGA, made by Luca Mari, 2018.";
 rem += "\n\nIt is free software: you can redistribute it and/or modify it";
 rem += "\nunder the terms of the GNU General Public License";
 rem += "\nas published by the Free Software Foundation, version 2.";
@@ -22,51 +22,24 @@ rem += "\n\nSee a short how-to-use at https://github.com/lmari/GA";
 <meta charset="UTF-8">
 <title>PolyGA</title>
 <link rel="stylesheet" href="res/jquery-ui.min.css">
+<link rel="stylesheet" href="res/widgets.css">
 <script src="res/jquery.min.js"></script>
 <script src="res/jquery-ui.min.js"></script>
 <script src="res/Chart.bundle.min.js"></script>
 <script src="res/utils.js"></script>
 <script src="res/widgets.js"></script>
-<script src="res/txt_it.js"></script>
-<script>
-var numPts, numSrs, numDel;
-//defaults
-var numPts = defNumPts = 3;
-var numSrs = defNumSrs = 5;
-var numDel = defNumDel = 1;
-
-$(document).ready(function() {
-  setText('t0', 'setup');
-  setText('a0', 'tNumPts');
-  setSlider('a1', 'tNumPts', '', txt.toolNumPts, 2, 20, 1, defNumPts);
-  setText('b0', 'tNumSrs');
-  setSlider('b1', 'tNumSrs', '', txt.toolNumSrs, 1, 50, 1, defNumSrs);
-  setText('t1', 'selection');
-  setText('c0', 'tNumDel');
-  setSlider('c1', 'tNumDel', '', txt.toolNumDel, 0, numSrs, 1, defNumDel);
-
-  $("#tNumSrs").on("slidechange", function(event, ui) {
-    $('#htNumSrs').text(ui.value);
-    let nSrs = getSliderValue("tNumSrs");
-    setSliderMax("tNumDel", nSrs);
-  });
-
-});
-</script>
 </head>
 <body>
 <h1>PolyGA: an example of Genetic Algorithm
 <a href="javascript:window.alert(rem);">[?]</a>
 </h1>
-<table><tr><td><b id='t0'></b></td>
-<td id='a0'></td><td id='a1'></td>
-<td id='b0'></td><td id='b1'></td>
-</tr></table>
 
-<table><tr><td><b id='t1'></b></td>
-<td id='c0'></td><td id='c1'></td>
-</tr></table>
+<b>Set up</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# genes/points: <input type="textbox" id="tNumPts" size="1"></input>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# individuals/test polynomials: <input type="textbox" id="tNumSrs" size="1"></input>
 
+<p><b>Selection</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+# killed/deleted: <input type="textbox" id="tNumDel" size="1"></input>
 
 <p><b>Generation</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 % crossover/combination: <input type="textbox" id="tCombin" size="1"></input>
@@ -95,12 +68,18 @@ ampl mutation/change: <input type="textbox" id="tChang2" size="1"></input>
 
 <script>
 //defaults
+var defNumPts = 3;
+var defNumSrs = 3;
+var defNumDel = 1;
 var defCombin = 10;
 var defChange = 10;
 var defChang2 = 10;
 var defNumNew = 1;
 
-var combin, change, chang2, numNew, showData;
+var numPts, numSrs, numDel, combin, change, chang2, numNew, showData;
+$('#tNumPts').val(numPts = defNumPts);
+$('#tNumSrs').val(numSrs = defNumSrs);
+$('#tNumDel').val(numDel = defNumDel);
 $('#tCombin').val(combin = defCombin);
 $('#tChange').val(change = defChange);
 $('#tChang2').val(chang2 = defChang2);
@@ -108,8 +87,8 @@ $('#tNumNew').val(numNew = defNumNew);
 $('#cShowData').prop('checked', showData = true);
 
 function changeParams() {
-  numDel = getSliderValue("tNumDel");
-
+  numDel = $('#tNumDel').val();
+  if(!checkRange(numDel, 0, numSrs)) { $('#tNumDel').val(numDel = defNumDel); }
   combin = $('#tCombin').val();
   if(!checkRange(combin, 0, 50)) { $('#tCombin').val(combin = defCombin); }
   change = $('#tChange').val();
@@ -121,8 +100,10 @@ function changeParams() {
 }
 
 $('#bSet').click(function () {
-  numPts = getSliderValue("tNumPts");
-  numSrs = getSliderValue("tNumSrs");
+  numPts = $('#tNumPts').val();
+  if(!checkRange(numPts, 2, 20)) { $('#tNumPts').val(numPts = defNumPts); }
+	numSrs = $('#tNumSrs').val();
+  if(!checkRange(numSrs, 1, 50)) { $('#tNumSrs').val(numSrs = defNumSrs); }
   changeParams();
   setAll();
 });
@@ -145,6 +126,5 @@ var ctx = $("#myCanvas");
 
 setAll();
 </script>
-<div id="buffer"></div>
 </body>
 </html>
