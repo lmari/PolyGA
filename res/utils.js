@@ -11,21 +11,19 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License <http://www.gnu.org/licenses/> for more details.
 */
 Array.prototype.toString = function(n) {
-  var res = '';
-  for(var i = 0; i < this.length; i++) {
-    res += this[i].toFixed(n) + ' ';
-  }
+  let res = '';
+  for(let i = 0; i < this.length; i++) res += this[i].toFixed(n) + ' ';
   return res;
 }
 
 Array.prototype.remove = function(from, to) {
-  var rest = this.slice((to || from) + 1 || this.length);
+  let rest = this.slice((to || from) + 1 || this.length);
   this.length = from < 0 ? this.length + from : from;
   return this.push.apply(this, rest);
 };
 
 function checkRange(what, from, to) {
-  var n = parseInt(what);
+  let n = parseInt(what);
   return !(!Number.isInteger(n) || (n < from) || (n > to));
 }
 

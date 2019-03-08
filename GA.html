@@ -29,28 +29,57 @@ rem += "\n\nSee a short how-to-use at https://github.com/lmari/GA";
 <script src="res/widgets.js"></script>
 <script src="res/txt_it.js"></script>
 <script>
-var numPts, numSrs, numDel;
 //defaults
 var numPts = defNumPts = 3;
 var numSrs = defNumSrs = 5;
 var numDel = defNumDel = 1;
+var combin = defCombin = 10;
+var change = defChange = 10;
+var chang2 = defChang2 = 10;
+var numNew = defNumNew = 1;
+
+var sNumPts, sNumSrs, sNumDel, sCombin, sChange, sChang2, sNumNew;
+var bManExec, bAutoExec, bReset;
 
 $(document).ready(function() {
-  setText('t0', 'setup');
-  setText('a0', 'tNumPts');
-  setSlider('a1', 'tNumPts', '', txt.toolNumPts, 2, 20, 1, defNumPts);
-  setText('b0', 'tNumSrs');
-  setSlider('b1', 'tNumSrs', '', txt.toolNumSrs, 1, 50, 1, defNumSrs);
-  setText('t1', 'selection');
-  setText('c0', 'tNumDel');
-  setSlider('c1', 'tNumDel', '', txt.toolNumDel, 0, numSrs, 1, defNumDel);
+  setText('xSetup', 'setup');
+  setText('xNumPts', 'tNumPts');
+  sNumPts = new _Slider('xxNumPts', '', txt.toolNumPts, 2, 20, 1, defNumPts);
+  setText('xNumSrs', 'tNumSrs');
+  sNumSrs = new _Slider('xxNumSrs', '', txt.toolNumSrs, 1, 50, 1, defNumSrs);
+  setText('xSelection', 'selection');
+  setText('xNumDel', 'tNumDel');
+  sNumDel = new _Slider('xxNumDel', '', txt.toolNumDel, 0, numSrs, 1, defNumDel);
+  setText('xGeneration', 'generation');
+  setText('xCombin', 'tCombin');
+  sCombin = new _Slider('xxCombin', '', txt.toolCombin, 0, 50, 10, defCombin);
+  setText('xChange', 'tChange');
+  sChange = new _Slider('xxChange', '', txt.toolChange, 0, 100, 10, defChange);
+  setText('xChang2', 'tChang2');
+  sChang2 = new _Slider('xxChang2', '', txt.toolChang2, 0, 100, 10, defChang2);
+  setText('xNumNew', 'tNumNew');
+  sNumNew = new _Slider('xxNumNew', '', txt.toolNumNew, 0, numSrs, 1, defNumNew);
 
-  $("#tNumSrs").on("slidechange", function(event, ui) {
-    $('#htNumSrs').text(ui.value);
-    let nSrs = getSliderValue("tNumSrs");
-    setSliderMax("tNumDel", nSrs);
+  sNumSrs.onChange(function() {
+    let nSrs = sNumSrs.getValue();
+    sNumDel.setMax(nSrs);
+    sNumNew.setMax(nSrs);
   });
+  sNumDel.onChange(() => numDel = sNumDel.getValue());
+  sCombin.onChange(() => combin = sCombin.getValue());
+  sChange.onChange(() => change = sChange.getValue());
+  sChang2.onChange(() => chang2 = sChang2.getValue());
+  sNumNew.onChange(() => numNew = sNumNew.getValue());
 
+
+  bManExec = new _Button('g0', '1. Select', 'prova');
+  bManExec.setActions(selectFit, '1. Select', removeUnfit, '2. Remove', updateSrs, '3. Update');
+
+  bReset = new _Button('h0', 'Reset target', 'prova');
+  bReset.setAction(() => resetTarget(true));
+
+  bAutoExec = new _Button('i0', 'Start', 'prova');
+  bAutoExec.setActions(startProcess, 'Start', stopProcess, 'Stop');
 });
 </script>
 </head>
@@ -58,34 +87,26 @@ $(document).ready(function() {
 <h1>PolyGA: an example of Genetic Algorithm
 <a href="javascript:window.alert(rem);">[?]</a>
 </h1>
-<table><tr><td><b id='t0'></b></td>
-<td id='a0'></td><td id='a1'></td>
-<td id='b0'></td><td id='b1'></td>
-</tr></table>
+<table>
+  <tr><td><b id='xSetup'></b></td>
+    <td id='xNumPts'></td><td id='xxNumPts'></td></tr>
+  <tr><td></td><td id='xNumSrs'></td><td id='xxNumSrs'></td></tr>
+  <tr><td><b id='xSelection'></b></td>
+    <td id='xNumDel'></td><td id='xxNumDel'></td></tr>
+  <tr><td><b id='xGeneration'></b></td>
+    <td id='xCombin'></td><td id='xxCombin'></td></tr>
+  <tr><td></td><td id='xChange'></td><td id='xxChange'></td></tr>
+  <tr><td></td><td id='xChang2'></td><td id='xxChang2'></td></tr>
+  <tr><td><b id='t3'>Immigrazione</b></td>
+    <td id='xNumNew'></td><td id='xxNumNew'></td></tr>
+</table>
 
-<table><tr><td><b id='t1'></b></td>
-<td id='c0'></td><td id='c1'></td>
-</tr></table>
-
-
-<p><b>Generation</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-% crossover/combination: <input type="textbox" id="tCombin" size="1"></input>
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-% mutation/change: <input type="textbox" id="tChange" size="1"></input>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-ampl mutation/change: <input type="textbox" id="tChang2" size="1"></input>
-
-<p><b>Immigration</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-# new individuals/new polynomials: <input type="textbox" id="tNumNew" size="1"></input>
+<div id='g0'></div>
+<div id='h0'></div>
+<div id='i0'></div>
 
 <p><button id="bSet">Set all</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<button id="bChange">Change Sel/Gen/Imm params</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp
-<button id="bReset">Reset target</button>
 
-<p><button id="bSelect">Select</button>
-<button id="bRemove">Remove</button>
-<button id="bUpdate">Update</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<button id="bStart">Start</button>
-<button id="bStop">Stop</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <input type="checkbox" id="cShowData">Show params
 
 <div style="position:relative; left:10px; width:600px;">
@@ -94,57 +115,23 @@ ampl mutation/change: <input type="textbox" id="tChang2" size="1"></input>
 <div id="myText" style="position:relative; left:20px;">...</div>
 
 <script>
-//defaults
-var defCombin = 10;
-var defChange = 10;
-var defChang2 = 10;
-var defNumNew = 1;
-
-var combin, change, chang2, numNew, showData;
-$('#tCombin').val(combin = defCombin);
-$('#tChange').val(change = defChange);
-$('#tChang2').val(chang2 = defChang2);
-$('#tNumNew').val(numNew = defNumNew);
+var showData;
 $('#cShowData').prop('checked', showData = true);
 
-function changeParams() {
-  numDel = getSliderValue("tNumDel");
-
-  combin = $('#tCombin').val();
-  if(!checkRange(combin, 0, 50)) { $('#tCombin').val(combin = defCombin); }
-  change = $('#tChange').val();
-  if(!checkRange(change, 0, 100)) { $('#tChange').val(change = defChange); }
-  chang2 = $('#tChang2').val();
-  if(!checkRange(chang2, 0, 100)) { $('#tChang2').val(chang2 = defChang2); }
-  numNew = $('#tNumNew').val();
-  if(!checkRange(numNew, 0, numSrs)) { $('#tnumNew').val(numNew = defNumNew); }
-}
-
 $('#bSet').click(function () {
-  numPts = getSliderValue("tNumPts");
-  numSrs = getSliderValue("tNumSrs");
-  changeParams();
+  numPts = sNumPts.getValue();
+  numSrs = sNumSrs.getValue();
   setAll();
 });
-
-$('#bChange').click(() => changeParams());
 
 $('#cShowData').click(function () {
   showData = $('#cShowData').prop('checked');
   writeData("#myText", false, true);
 });
 
-$('#bSelect').click(() => selectFit());
-$('#bRemove').click(() => removeUnfit());
-$('#bUpdate').click(() => updateSrs());
-$('#bStart').click(() => startProcess());
-$('#bStop').click(() => stopProcess());
-$('#bReset').click(() => resetTarget(true));
-
 var ctx = $("#myCanvas");
 
 setAll();
 </script>
-<div id="buffer"></div>
 </body>
 </html>
