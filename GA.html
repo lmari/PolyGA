@@ -44,6 +44,8 @@ var bManExec, bAutoExec, bSetAll, bResetTarget;
 var cShowParams;
 
 $(document).ready(function() {
+  setText('xEvolByStep', 'evolByStep');
+  setText('xEvolFast', 'evolFast');
   setText('xSetup', 'setup');
   setText('xNumPts', 'numPts');
   sNumPts = new _Slider('xxNumPts', '', txt.toolNumPts, 2, 20, 1, defNumPts);
@@ -59,6 +61,7 @@ $(document).ready(function() {
   sChange = new _Slider('xxChange', '', txt.toolChange, 0, 100, 10, defChange);
   setText('xChang2', 'chang2');
   sChang2 = new _Slider('xxChang2', '', txt.toolChang2, 0, 100, 10, defChang2);
+  setText('xImmigration', 'immigration');
   setText('xNumNew', 'numNew');
   sNumNew = new _Slider('xxNumNew', '', txt.toolNumNew, 0, numSrs, 1, defNumNew);
 
@@ -97,15 +100,22 @@ $(document).ready(function() {
   cShowParams = new _Checkbox('xShowParams', txt.showParams, txt.toolShowParams);
   cShowParams.setAction(() => writeData("#myText", showData = cShowParams.isChecked(), false, true));
 });
+
+$(function() { $(document).tooltip({
+  position: { my: "left top", at: "left top", collision: "fit", of: "#myHelp", within: "#myHelp" },
+  show: { effect: "scale", delay: 250 },
+  hide: { effect: "blind", delay: 250 },
+  content: function() { return this.getAttribute("title"); }
+}); });
 </script>
 </head>
 <body>
-<h1>PolyGA: an example of Genetic Algorithm
+<h1>PolyGA: un esempio di Algoritmo Genetico
 <a href="javascript:window.alert(rem);">[?]</a>
 </h1>
 <table>
-  <tr><td><b id='xC'>Evoluzione passo-passo</b></td><td id='xManExec'></td>
-  <td><b id='xC'>veloce</b></td><td id='xAutoExec'></td></tr>
+  <tr><td><b id='xEvolByStep'></b></td><td id='xManExec'></td>
+  <td>&nbsp;&nbsp;&nbsp;<b id='xEvolFast'></b></td><td id='xAutoExec'></td></tr>
 </table>
 
 <div style="position:relative; left:10px; width:600px;">
@@ -114,7 +124,7 @@ $(document).ready(function() {
 
 <table>
   <tr><td><b id='xSetup'></b></td>
-    <td id='xNumPts'></td><td id='xxNumPts'></td></tr>
+    <td id='xNumPts'></td><td id='xxNumPts'></td><td id='myHelp' rowspan='7'></td></tr>
   <tr><td></td><td id='xNumSrs'></td><td id='xxNumSrs'></td></tr>
   <tr><td><b id='xSelection'></b></td>
     <td id='xNumDel'></td><td id='xxNumDel'></td></tr>
@@ -122,7 +132,7 @@ $(document).ready(function() {
     <td id='xCombin'></td><td id='xxCombin'></td></tr>
   <tr><td></td><td id='xChange'></td><td id='xxChange'></td></tr>
   <tr><td></td><td id='xChang2'></td><td id='xxChang2'></td></tr>
-  <tr><td><b id='t3'>Immigrazione</b></td>
+  <tr><td><b id='xImmigration'></b></td>
     <td id='xNumNew'></td><td id='xxNumNew'></td></tr>
 </table>
 

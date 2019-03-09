@@ -79,7 +79,7 @@ class _Slider {
       this.domEl.before(text);
       this.domEl.css({"margin-left": "5em", "margin-top": "-.8em", "width": "10em"});
     } else this.domEl.css({"width": "10em"});
-    this.domEl2.css({"width": "3em", "height": "1.6em", "top": "50%", "margin-top": "-.8em", "text-align": "center", "line-height": "1.6em"});
+    this.domEl2.css({"width": "2em", "height": "1.4em", "top": "50%", "margin-top": "-.7em", "text-align": "center", "line-height": "1.4em"});
     _Slider.count++;
   }
 
