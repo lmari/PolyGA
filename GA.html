@@ -49,7 +49,7 @@ $(document).ready(function() {
   sNumSrs = new _Slider('xxNumSrs', '', txt.toolNumSrs, 1, 50, 1, defNumSrs);
   setText('xSelection', 'selection');
   setText('xNumDel', 'tNumDel');
-  sNumDel = new _Slider('xxNumDel', '', txt.toolNumDel, 0, numSrs, 1, defNumDel);
+  sNumDel = new _Slider('xxNumDel', '', txt.toolNumDel, 0, numSrs-1, 1, defNumDel);
   setText('xGeneration', 'generation');
   setText('xCombin', 'tCombin');
   sCombin = new _Slider('xxCombin', '', txt.toolCombin, 0, 50, 10, defCombin);
@@ -71,15 +71,16 @@ $(document).ready(function() {
   sChang2.onChange(() => chang2 = sChang2.getValue());
   sNumNew.onChange(() => numNew = sNumNew.getValue());
 
-
-  bManExec = new _Button('g0', '1. Select', 'prova');
-  bManExec.setActions(selectFit, '1. Select', removeUnfit, '2. Remove', updateSrs, '3. Update');
+  bManExec = new _Button('g0', txt.bManExec1, txt.toolBManExec);
+  bManExec.setActions(() => { enableConfiguration(false); enableTuning(false); selectFit(); }, txt.bManExec1,
+    removeUnfit, txt.bManExec2,
+    () => { updateSrs(); enableConfiguration(true); enableTuning(true); }, txt.bManExec3);
 
   bReset = new _Button('h0', 'Reset target', 'prova');
   bReset.setAction(() => resetTarget(true));
 
-  bAutoExec = new _Button('i0', 'Start', 'prova');
-  bAutoExec.setActions(startProcess, 'Start', stopProcess, 'Stop');
+  bAutoExec = new _Button('i0', txt.bAutoExec1, txt.toolBAutoExec);
+  bAutoExec.setActions(startProcess, txt.bAutoExec1, stopProcess, txt.bAutoExec2);
 });
 </script>
 </head>

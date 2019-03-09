@@ -1,10 +1,21 @@
 class _Button {
   constructor(container, label, tooltip) {
-    let domEl = "_B_" + _Button.count;
+    let domEl = '_B_' + _Button.count;
     $('#' + container).html("<button id='" + domEl + "' title='" + tooltip + "' class='ui-button ui-widget ui-corner-all'>" + label + "</button>");
     this.domEl = $('#' + domEl);
     this.state = 0;
     _Button.count++;
+  }
+
+  enable() {
+    document.getElementById(this.getId()).disabled = false;
+    let s = this.domEl.html();
+    if(s.substring(0,3) == '<i>') this.domEl.html(s.substring(3,s.length-4));
+  }
+
+  disable() {
+    this.domEl.html('<i>' + this.domEl.html() + '</i>');
+    document.getElementById(this.getId()).disabled = true;
   }
 
   getId() { return this.domEl.attr('id'); }
@@ -52,6 +63,8 @@ class _Slider {
     this.domEl2.css({"width": "3em", "height": "1.6em", "top": "50%", "margin-top": "-.8em", "text-align": "center", "line-height": "1.6em"});
     _Slider.count++;
   }
+
+  enable(x) { this.domEl.slider(x ? 'enable' : 'disable'); }
 
   getValue() { return this.domEl.slider('value'); }
 

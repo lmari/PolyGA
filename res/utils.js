@@ -27,6 +27,19 @@ function checkRange(what, from, to) {
   return !(!Number.isInteger(n) || (n < from) || (n > to));
 }
 
+function enableConfiguration(x) {
+  sNumPts.enable(x);
+  sNumSrs.enable(x);
+}
+
+function enableTuning(x) {
+  sNumDel.enable(x);
+  sCombin.enable(x);
+  sChange.enable(x);
+  sChang2.enable(x);
+  sNumNew.enable(x);
+}
+
 var xData, pTarg, yTarg, pData, yData, MSEs, sortedMSEs, median, lastFit, minTarg, maxTarg, chart;
 var selectedAsUnfit = new Array();
 
@@ -249,6 +262,18 @@ function updateSrs() {
 var funId = -99;
 var numGen = 1;
 function startProcess() {
+  if(bManExec.state == 1) {
+    removeUnfit();
+    updateSrs();
+    bManExec.setLabel(txt.bManExec1);
+    bManExec.state = 0;
+  } else if(bManExec.state == 2) {
+      updateSrs();
+      bManExec.setLabel(txt.bManExec1);
+      bManExec.state = 0;
+    }
+  bManExec.disable();
+  enableConfiguration(false);
   if(funId == -99) { //just to avoid multiple starts...
     funId = setInterval(function() {
       numGen++;
@@ -263,4 +288,6 @@ function stopProcess() {
   clearInterval(funId);
   funId = -99;
   numGen = 1;
+  bManExec.enable();
+  enableConfiguration(true);
 }
