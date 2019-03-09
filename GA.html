@@ -37,33 +37,40 @@ var combin = defCombin = 10;
 var change = defChange = 10;
 var chang2 = defChang2 = 10;
 var numNew = defNumNew = 1;
+var showData = false;
 
 var sNumPts, sNumSrs, sNumDel, sCombin, sChange, sChang2, sNumNew;
-var bManExec, bAutoExec, bReset;
+var bManExec, bAutoExec, bSetAll, bResetTarget;
+var cShowParams;
 
 $(document).ready(function() {
   setText('xSetup', 'setup');
-  setText('xNumPts', 'tNumPts');
+  setText('xNumPts', 'numPts');
   sNumPts = new _Slider('xxNumPts', '', txt.toolNumPts, 2, 20, 1, defNumPts);
-  setText('xNumSrs', 'tNumSrs');
+  setText('xNumSrs', 'numSrs');
   sNumSrs = new _Slider('xxNumSrs', '', txt.toolNumSrs, 1, 50, 1, defNumSrs);
   setText('xSelection', 'selection');
-  setText('xNumDel', 'tNumDel');
+  setText('xNumDel', 'numDel');
   sNumDel = new _Slider('xxNumDel', '', txt.toolNumDel, 0, numSrs-1, 1, defNumDel);
   setText('xGeneration', 'generation');
-  setText('xCombin', 'tCombin');
+  setText('xCombin', 'combin');
   sCombin = new _Slider('xxCombin', '', txt.toolCombin, 0, 50, 10, defCombin);
-  setText('xChange', 'tChange');
+  setText('xChange', 'change');
   sChange = new _Slider('xxChange', '', txt.toolChange, 0, 100, 10, defChange);
-  setText('xChang2', 'tChang2');
+  setText('xChang2', 'chang2');
   sChang2 = new _Slider('xxChang2', '', txt.toolChang2, 0, 100, 10, defChang2);
-  setText('xNumNew', 'tNumNew');
+  setText('xNumNew', 'numNew');
   sNumNew = new _Slider('xxNumNew', '', txt.toolNumNew, 0, numSrs, 1, defNumNew);
 
+  sNumPts.onChange(function() {
+    numPts = sNumPts.getValue();
+    setAll();
+  });
   sNumSrs.onChange(function() {
-    let nSrs = sNumSrs.getValue();
-    sNumDel.setMax(nSrs);
-    sNumNew.setMax(nSrs);
+    numSrs = sNumSrs.getValue();
+    sNumDel.setMax(numSrs);
+    sNumNew.setMax(numSrs);
+    setAll();
   });
   sNumDel.onChange(() => numDel = sNumDel.getValue());
   sCombin.onChange(() => combin = sCombin.getValue());
@@ -71,16 +78,24 @@ $(document).ready(function() {
   sChang2.onChange(() => chang2 = sChang2.getValue());
   sNumNew.onChange(() => numNew = sNumNew.getValue());
 
-  bManExec = new _Button('g0', txt.bManExec1, txt.toolBManExec);
-  bManExec.setActions(() => { enableConfiguration(false); enableTuning(false); selectFit(); }, txt.bManExec1,
-    removeUnfit, txt.bManExec2,
-    () => { updateSrs(); enableConfiguration(true); enableTuning(true); }, txt.bManExec3);
+  bManExec = new _Button('xManExec', txt.manExec1, txt.toolManExec);
+  bManExec.setActions(() => {
+    enableConfiguration(false); enableTuning(false); selectFit(); }, txt.manExec1,
+    removeUnfit, txt.manExec2,
+    () => { updateSrs(); enableConfiguration(true); enableTuning(true); }, txt.manExec3
+  );
 
-  bReset = new _Button('h0', 'Reset target', 'prova');
-  bReset.setAction(() => resetTarget(true));
+  bAutoExec = new _Button('xAutoExec', txt.autoExec1, txt.toolAutoExec);
+  bAutoExec.setActions(startProcess, txt.autoExec1, stopProcess, txt.autoExec2);
 
-  bAutoExec = new _Button('i0', txt.bAutoExec1, txt.toolBAutoExec);
-  bAutoExec.setActions(startProcess, txt.bAutoExec1, stopProcess, txt.bAutoExec2);
+  bSetAll = new _Button('xSetAll', txt.setAll, txt.toolSetAll);
+  bSetAll.setAction(setAll);
+
+  bResetTarget = new _Button('xResetTarget', txt.resetTarget, txt.toolResetTarget);
+  bResetTarget.setAction(() => resetTarget(true));
+
+  cShowParams = new _Checkbox('xShowParams', txt.showParams, txt.toolShowParams);
+  cShowParams.setAction(() => writeData("#myText", showData = cShowParams.isChecked(), false, true));
 });
 </script>
 </head>
@@ -88,6 +103,15 @@ $(document).ready(function() {
 <h1>PolyGA: an example of Genetic Algorithm
 <a href="javascript:window.alert(rem);">[?]</a>
 </h1>
+<table>
+  <tr><td><b id='xC'>Evoluzione passo-passo</b></td><td id='xManExec'></td>
+  <td><b id='xC'>veloce</b></td><td id='xAutoExec'></td></tr>
+</table>
+
+<div style="position:relative; left:10px; width:600px;">
+  <canvas id="myCanvas" style="border:2px solid #FF9933;"></canvas>
+</div>
+
 <table>
   <tr><td><b id='xSetup'></b></td>
     <td id='xNumPts'></td><td id='xxNumPts'></td></tr>
@@ -102,36 +126,14 @@ $(document).ready(function() {
     <td id='xNumNew'></td><td id='xxNumNew'></td></tr>
 </table>
 
-<div id='g0'></div>
-<div id='h0'></div>
-<div id='i0'></div>
+<table>
+  <tr><td id='xSetAll'></td><td id='xResetTarget'></td><td id='xShowParams'></td></tr>
+</table>
 
-<p><button id="bSet">Set all</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-<input type="checkbox" id="cShowData">Show params
-
-<div style="position:relative; left:10px; width:600px;">
-  <canvas id="myCanvas" style="border:2px solid #FF9933;"></canvas>
-</div>
 <div id="myText" style="position:relative; left:20px;">...</div>
 
 <script>
-var showData;
-$('#cShowData').prop('checked', showData = true);
-
-$('#bSet').click(function () {
-  numPts = sNumPts.getValue();
-  numSrs = sNumSrs.getValue();
-  setAll();
-});
-
-$('#cShowData').click(function () {
-  showData = $('#cShowData').prop('checked');
-  writeData("#myText", false, true);
-});
-
 var ctx = $("#myCanvas");
-
 setAll();
 </script>
 </body>

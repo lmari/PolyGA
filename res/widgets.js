@@ -7,15 +7,12 @@ class _Button {
     _Button.count++;
   }
 
-  enable() {
-    document.getElementById(this.getId()).disabled = false;
-    let s = this.domEl.html();
-    if(s.substring(0,3) == '<i>') this.domEl.html(s.substring(3,s.length-4));
-  }
-
-  disable() {
-    this.domEl.html('<i>' + this.domEl.html() + '</i>');
-    document.getElementById(this.getId()).disabled = true;
+  enable(x) {
+    this.domEl.prop('disabled', !x);
+    if(x) {
+      let s = this.domEl.html();
+      if(s.substring(0,3) == '<i>') this.domEl.html(s.substring(3,s.length-4));
+    } else this.domEl.html('<i>' + this.domEl.html() + '</i>');
   }
 
   getId() { return this.domEl.attr('id'); }
@@ -37,6 +34,28 @@ class _Button {
 }
 
 _Button.count = 0;
+
+
+class _Checkbox {
+  constructor(container, label, tooltip) {
+    let domEl = '_C_' + _Checkbox.count;
+    $('#' + container).html("<label for='" + domEl + "'>" + label + "</label><input type='checkbox' id='" + domEl + "' title='" + tooltip + "'>");
+    this.domEl = $('#' + domEl);
+    _Checkbox.count++;
+  }
+
+  enable(x) { this.domEl.prop('disabled', !x); }
+
+  getId() { return this.domEl.attr('id'); }
+
+  setChecked(x) { this.domEl.prop('checked', x); }
+
+  isChecked(x) { return this.domEl.prop('checked'); }
+
+  setAction(fun) { this.domEl.on('click', fun); }
+}
+
+_Checkbox.count = 0;
 
 
 class _Slider {

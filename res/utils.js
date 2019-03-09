@@ -43,12 +43,12 @@ function enableTuning(x) {
 var xData, pTarg, yTarg, pData, yData, MSEs, sortedMSEs, median, lastFit, minTarg, maxTarg, chart;
 var selectedAsUnfit = new Array();
 
-function writeData(field, withHighlight, wholePop) { //write some data
+function writeData(field, fullShow, withHighlight, wholePop) { //write some data
   var num = wholePop ? numSrs : numSrs - numDel;
   var txt = '<h3>num gen: ' + numGen;
   txt += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;median MSE: ' + median.toFixed(3);
   txt += '</h3>';
-  if(showData) {
+  if(fullShow) {
     txt += 'x: ' + xData.toString(2) + '<br>';
     txt += 'target (params): ' + pTarg.toString(3) + '<br>';
     //txt += 'target (coords): ' + yTarg.toString(3) + '<br>';
@@ -99,7 +99,7 @@ function resetTarget(refresh) { //(re)set the target polynomial: x coords, param
   if(refresh) {
     computeMSEs();
     setChartData();
-    writeData("#myText", false, true);
+    writeData("#myText", showData, false, true);
   }
 }
 
@@ -177,7 +177,7 @@ function setAll() {
   setData();
   computeMSEs();
   setChartData();
-  writeData("#myText", false, true);
+  writeData("#myText", showData, false, true);
 }
 
 function selectFit() {
@@ -192,7 +192,7 @@ function selectFit() {
       chart.data.datasets[j+1].borderDash = [5, 5];
     }
     chart.update();
-    writeData("#myText", true, true);
+    writeData("#myText", showData, true, true);
   }
 }
 
@@ -215,7 +215,7 @@ function removeUnfit() {
     median = 0;
   }
   chart.update();
-  writeData("#myText", false, false);
+  writeData("#myText", showData, false, false);
   selectedAsUnfit = new Array();
 }
 
@@ -256,7 +256,7 @@ function updateSrs() {
   computeMSEs();
   setChartData()
   chart.update();
-  writeData("#myText", false, true);
+  writeData("#myText", showData, false, true);
 }
 
 var funId = -99;
@@ -265,15 +265,16 @@ function startProcess() {
   if(bManExec.state == 1) {
     removeUnfit();
     updateSrs();
-    bManExec.setLabel(txt.bManExec1);
+    bManExec.setLabel(txt.manExec1);
     bManExec.state = 0;
   } else if(bManExec.state == 2) {
       updateSrs();
-      bManExec.setLabel(txt.bManExec1);
+      bManExec.setLabel(txt.manExec1);
       bManExec.state = 0;
     }
-  bManExec.disable();
+  bManExec.enable(false);
   enableConfiguration(false);
+  enableTuning(true);
   if(funId == -99) { //just to avoid multiple starts...
     funId = setInterval(function() {
       numGen++;
@@ -288,6 +289,6 @@ function stopProcess() {
   clearInterval(funId);
   funId = -99;
   numGen = 1;
-  bManExec.enable();
+  bManExec.enable(true);
   enableConfiguration(true);
 }
