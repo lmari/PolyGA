@@ -1,7 +1,21 @@
+/*
+This file is part of PolyGA, made by Luca Mari, 2018-2019.
+
+PolyGA is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 2.
+
+PolyGA is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License <http://www.gnu.org/licenses/> for more details.
+*/
+'use strict';
+
 class _Button {
   constructor(container, label, tooltip) {
     let domEl = '_B_' + _Button.count;
-    $('#' + container).html("<button id='" + domEl + "' title='" + tooltip + "' class='ui-button ui-widget ui-corner-all'>" + label + "</button>");
+    $('#' + container).html(`<button id='${domEl}' title='${tooltip}' class='ui-button ui-widget ui-corner-all'>${label}</button>`);
     this.domEl = $('#' + domEl);
     this.state = 0;
     _Button.count++;
@@ -39,7 +53,7 @@ _Button.count = 0;
 class _Checkbox {
   constructor(container, label, tooltip) {
     let domEl = '_C_' + _Checkbox.count;
-    $('#' + container).html("<label for='" + domEl + "'>" + label + "</label><input type='checkbox' id='" + domEl + "' title='" + tooltip + "'>");
+    $('#' + container).html(`<label for='${domEl}'>${label}</label><input type='checkbox' id='${domEl}' title='${tooltip}'>`);
     this.domEl = $('#' + domEl);
     _Checkbox.count++;
   }
@@ -61,7 +75,7 @@ _Checkbox.count = 0;
 class _Slider {
   constructor(container, text, tooltip, min, max, step, initialValue) {
     let domEl = "_S_" + _Slider.count;
-    $('#' + container).html("<div id='" + domEl + "' title='" + tooltip + "'><span id='h" + domEl + "' class='ui-slider-handle'></span></div>");
+    $('#' + container).html(`<div id='${domEl}' title='${tooltip}'><span id='h${domEl}' class='ui-slider-handle'></span></div>`);
     this.domEl = $('#' + domEl);
     this.domEl2 = $('#h' + domEl);
     this.boundFun;

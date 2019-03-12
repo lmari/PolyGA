@@ -24,31 +24,40 @@ rem += "\n\nSee a short how-to-use at https://github.com/lmari/GA";
 <link rel="stylesheet" href="res/jquery-ui.min.css">
 <script src="res/jquery.min.js"></script>
 <script src="res/jquery-ui.min.js"></script>
+<script src="res/txt_it.js"></script>
 <script src="res/Chart.bundle.min.js"></script>
 <script src="res/utils.js"></script>
 <script src="res/widgets.js"></script>
-<script src="res/txt_it.js"></script>
 <script>
+'use strict';
 //defaults
-var numPts = defNumPts = 3;
-var numSrs = defNumSrs = 5;
-var numDel = defNumDel = 1;
-var combin = defCombin = 10;
-var change = defChange = 10;
-var chang2 = defChang2 = 10;
-var numNew = defNumNew = 1;
-var showData = false;
+const defNumPts = 3;
+const defNumSrs = 5;
+const defNumDel = 1;
+const defCombin = 10;
+const defChange = 10;
+const defChang2 = 10;
+const defNumNew = 1;
 
-var sNumPts, sNumSrs, sNumDel, sCombin, sChange, sChang2, sNumNew;
-var bManExec, bAutoExec, bSetAll, bResetTarget;
-var cShowParams;
+let numPts = defNumPts;
+let numSrs = defNumSrs;
+let numDel = defNumDel;
+let combin = defCombin;
+let change = defChange;
+let chang2 = defChang2;
+let numNew = defNumNew;
+let showData = false;
+
+let sNumPts, sNumSrs, sNumDel, sCombin, sChange, sChang2, sNumNew;
+let bManExec, bAutoExec, bSetAll, bResetTarget;
+let cShowParams;
 
 $(document).ready(function() {
   setText('xEvolByStep', 'evolByStep');
   setText('xEvolFast', 'evolFast');
   setText('xSetup', 'setup');
   setText('xNumPts', 'numPts');
-  sNumPts = new _Slider('xxNumPts', '', txt.toolNumPts, 2, 20, 1, defNumPts);
+  sNumPts = new _Slider('xxNumPts', '', txt.toolNumPts, 2, 10, 1, defNumPts);
   setText('xNumSrs', 'numSrs');
   sNumSrs = new _Slider('xxNumSrs', '', txt.toolNumSrs, 1, 50, 1, defNumSrs);
   setText('xSelection', 'selection');

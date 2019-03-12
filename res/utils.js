@@ -1,5 +1,5 @@
 /*
-This file is part of PolyGA, Copyright 2018, Luca Mari.
+This file is part of PolyGA, made by Luca Mari, 2018-2019.
 
 PolyGA is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -10,6 +10,8 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License <http://www.gnu.org/licenses/> for more details.
 */
+'use strict';
+
 Array.prototype.toString = function(n) {
   let res = '';
   for(let i = 0; i < this.length; i++) res += this[i].toFixed(n) + ' ';
@@ -27,6 +29,20 @@ function checkRange(what, from, to) {
   return !(!Number.isInteger(n) || (n < from) || (n > to));
 }
 
+let setRnd = () => Math.random() - 0.5;
+let setCorrectedRnd = i => (Math.random() - 0.5) / (2 * i + 1);
+
+function shuffle(a) {
+  let i, j, x;
+  for(let i = a.length - 1; i > 0; i--) {
+    j = Math.floor(Math.random() * (i + 1));
+    x = a[i];
+    a[i] = a[j];
+    a[j] = x;
+  }
+  return a;
+}
+
 function enableConfiguration(x) {
   sNumPts.enable(x);
   sNumSrs.enable(x);
@@ -40,42 +56,40 @@ function enableTuning(x) {
   sNumNew.enable(x);
 }
 
-var xData, pTarg, yTarg, pData, yData, MSEs, sortedMSEs, median, lastFit, minTarg, maxTarg, chart;
-var selectedAsUnfit = new Array();
+let xData, pTarg, yTarg, pData, yData, MSEs, sortedMSEs, median, lastFit, minTarg, maxTarg, chart;
+let selectedAsUnfit = new Array();
 
 function writeData(field, fullShow, withHighlight, wholePop) { //write some data
-  var num = wholePop ? numSrs : numSrs - numDel;
-  var txt = '<h3>num gen: ' + numGen;
-  txt += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;median MSE: ' + median.toFixed(3);
-  txt += '</h3>';
+  let num = wholePop ? numSrs : numSrs - numDel;
+  let txt = `<h3>${getTxt('numGen')}: ${numGen}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${getTxt('medianMSE')}: ${median.toFixed(3)}</h3>`;
   if(fullShow) {
-    txt += 'x: ' + xData.toString(2) + '<br>';
-    txt += 'target (params): ' + pTarg.toString(3) + '<br>';
+    //txt += 'x: ' + xData.toString(2) + '<br>';
+    txt += `target (params): ${pTarg.toString(3)}<br>`;
     //txt += 'target (coords): ' + yTarg.toString(3) + '<br>';
     if(!withHighlight) {
-      for(var j = 0; j < num; j++) {
-        txt += 'y[' + j + '] (params): ' + pData[j].toString(3) + '<br>';
+      for(let j = 0; j < num; j++) {
+        txt += `y[${j}] (params): ${pData[j].toString(3)}<br>`;
         //txt += 'y[' + j + '] (coords): ' + yData[j].toString(3) + '<br>';
       }
       txt += '<br>MSEs: ';
-      for(var j = 0; j < num; j++) { txt += MSEs[j].toFixed(3) + ' '; }
+      for(let j = 0; j < num; j++) { txt += MSEs[j].toFixed(3) + ' '; }
       txt += '<br>sorted MSEs: ';
-      for(var j = 0; j < num; j++) { txt += sortedMSEs[j].toFixed(3) + ' '; }
+      for(let j = 0; j < num; j++) { txt += sortedMSEs[j].toFixed(3) + ' '; }
     } else {
-      for(var j = 0; j < num; j++) {
+      for(let j = 0; j < num; j++) {
         if(selectedAsUnfit.includes(j)) { txt += '<b>'; }
-        txt += 'y[' + j + '] (params): ' + pData[j].toString(3) + '<br>';
+        txt += `y[${j}] (params): ${pData[j].toString(3)}<br>`;
         //txt += 'y[' + j + '] (coords): ' + yData[j].toString(3) + '<br>';
         if(selectedAsUnfit.includes(j)) { txt += '</b>'; }
       }
       txt += '<br>MSEs: ';
-      for(var j = 0; j < num; j++) {
+      for(let j = 0; j < num; j++) {
         if(selectedAsUnfit.includes(j)) { txt += '<b>'; }
         txt += MSEs[j].toFixed(3) + ' ';
         if(selectedAsUnfit.includes(j)) { txt += '</b>'; }
       }
       txt += '<br>sorted MSEs: ';
-      for(var j = 0; j < num; j++) { txt += sortedMSEs[j].toFixed(3) + ' '; }
+      for(let j = 0; j < num; j++) { txt += sortedMSEs[j].toFixed(3) + ' '; }
     }
   }
   $(field).html(txt);
@@ -85,13 +99,15 @@ function resetTarget(refresh) { //(re)set the target polynomial: x coords, param
   xData = new Array(); //x coords of world
   pTarg = new Array(); //params of target series
   yTarg = new Array(); //y coords of target series
-  var x, y;
-  for(var i = 0; i < numPts; i++) { xData.push(4 * i / (numPts - 1) - 2); } //x values, in [-2,2]
-  for(var i = 0; i < numPts; i++) { pTarg.push((Math.random() - 0.5) / (2 * i + 1)); } //to be estimated
-  for(var i = 0; i < numPts; i++) {
+  let x, y;
+  for(let i = 0; i < numPts; i++) {
+    xData.push(4 * i / (numPts - 1) - 2); //x values, in [-2,2]
+    pTarg.push(setCorrectedRnd(i)); //to be estimated
+  }
+  for(let i = 0; i < numPts; i++) {
     x = xData[i];
     y = 0;
-    for(var k = 0; k < numPts; k++) { y += pTarg[k] * (x**k); }
+    for(let k = 0; k < numPts; k++) { y += pTarg[k] * (x**k); }
     yTarg.push(y);
   }
   minTarg = Math.min(-1, Math.min.apply(Math, yTarg));
@@ -106,45 +122,47 @@ function resetTarget(refresh) { //(re)set the target polynomial: x coords, param
 function setData() { //(re)set the population polynomials: params, y coords
   pData = new Array(); //params of test series
   yData = new Array(); //y coords of test series
-  for(var j = 0; j < numSrs; j++) {
+  for(let j = 0; j < numSrs; j++) {
     pData[j] = new Array();
-    for(var i = 0; i < numPts; i++) { pData[j].push(Math.random() - 0.5); } //initial estimations
+    for(let i = 0; i < numPts; i++) { pData[j].push(setRnd()); } //initial estimations
   }
   computeSeries();
 }
 
 function computeSeries() {
-  for(var j = 0; j < numSrs; j++) {
+  let x, y;
+  for(let j = 0; j < numSrs; j++) {
     yData[j] = new Array();
-    for(var i = 0; i < numPts; i++) {
+    for(let i = 0; i < numPts; i++) {
       x = xData[i];
       y = 0;
-      for(var k = 0; k < numPts; k++) { y += pData[j][k] * (x**k); }
+      for(let k = 0; k < numPts; k++) { y += pData[j][k] * (x**k); }
       yData[j].push(y);
     }
   }
 }
 
 function computeMSEs() {
+  let e;
   MSEs = new Array();
-  for(var j = 0; j < numSrs; j++) {
+  for(let j = 0; j < numSrs; j++) {
     e = 0;
-    for(var i = 0; i < numPts; i++) { e += (yTarg[i] - yData[j][i])**2; }
+    for(let i = 0; i < numPts; i++) { e += (yTarg[i] - yData[j][i])**2; }
     MSEs.push(e / numPts);
   }
   sortedMSEs = Array.from(MSEs).sort((a,b) => {return a - b;});
-  var m = numSrs % 2 == 0 ? numSrs / 2 - 1 : (numSrs - 1) / 2;
+  let m = numSrs % 2 == 0 ? numSrs / 2 - 1 : (numSrs - 1) / 2;
   median = sortedMSEs[m];
 }
 
 function setChartData() {
-  var chartData = new Array();
+  let chartData = new Array();
   chartData.push({
     borderColor: 'rgb(99, 255, 132)',
       fill: false,
       data: yTarg
   });
-  for(var j = 0; j < numSrs; j++) {
+  for(let j = 0; j < numSrs; j++) {
     chartData.push({
       borderColor: 'rgb(255, 99, 132)',
       borderWidth: 1,
@@ -183,7 +201,7 @@ function setAll() {
 function selectFit() {
   selectedAsUnfit = new Array();
   lastFit = sortedMSEs[numSrs - numDel - 1];
-  for(var j = 0; j < numSrs; j++) {
+  for(let j = 0; j < numSrs; j++) {
     if(MSEs[j] <= lastFit) {
       chart.data.datasets[j+1].borderColor = 'rgb(0, 0, 255)';
     } else {
@@ -197,7 +215,7 @@ function selectFit() {
 }
 
 function removeUnfit() {
-  for(var j = numSrs-1; j >= 0; j--) {
+  for(let j = numSrs-1; j >= 0; j--) {
     if(MSEs[j] > lastFit) {
       chart.data.datasets.remove(j+1);
       pData.remove(j);
@@ -207,9 +225,9 @@ function removeUnfit() {
       chart.data.datasets[j+1].borderColor = 'rgb(255, 99, 132)';
     }
   }
-  var num = numSrs - numDel;
+  let num = numSrs - numDel;
   if(num > 0) {
-    var m = num % 2 == 0 ? num / 2 - 1 : (num - 1) / 2;
+    let m = num % 2 == 0 ? num / 2 - 1 : (num - 1) / 2;
     median = sortedMSEs[m];
   } else {
     median = 0;
@@ -220,36 +238,36 @@ function removeUnfit() {
 }
 
 function updateSrs() {
-  var cData = pData.slice(0); //clone the params of the fit series
+  let cData = pData.slice(0); //clone the params of the fit series
   pData = new Array();
   // combin == 0<=x<=50: offspring from a random parent with a probability of x/100 that each gene is of another random parent
   // (hence x==0: no crossover: offspring identical to a random parent (asexual reproduction);
   //      x==100: full crossover: offspring with 50-50 genes of two random parents)
   // change == 0<=x<=100: probability of x/100 that each gene has a mutation
   // introd == 0<=x<=100: percentage of immigrants, i.e., brand new random individuals
-  var c1 = combin / 100;
-  var c2 = change / 100;
-  var changeAmpl = chang2 / 100; //amplitude of mutation
-  var parentIndexes = new Array();
-  var num = numSrs - numDel;
-  for(var j = 0; j < num; j++) { parentIndexes.push(j); }
-  for(var j = 0; j < numSrs; j++) {
+  let c1 = combin / 100;
+  let c2 = change / 100;
+  let changeAmpl = chang2 / 100; //amplitude of mutation
+  let parentIndexes = new Array();
+  let num = numSrs - numDel;
+  for(let j = 0; j < num; j++) { parentIndexes.push(j); }
+  for(let j = 0; j < numSrs; j++) {
     pData[j] = new Array();
     if(j < (numSrs - numNew)) { //offspring from parents
-      var r1, r2;
+      let r1, r2;
       if(num == 1) {
         r1 = r2 = 0;
       } else {
-        parentIndexes.sort(() => { return 0.5 - Math.random(); });
+        parentIndexes = shuffle(parentIndexes);
         r1 = parentIndexes[0];
         r2 = parentIndexes[1];
       }
-      for(var i = 0; i < numPts; i++) {
+      for(let i = 0; i < numPts; i++) {
         pData[j][i] = cData[Math.random() > c1 ? r1 : r2][i]; //combin
-        if(Math.random() < c2) { pData[j][i] += (Math.random() - 0.5) * changeAmpl; } //change
+        if(Math.random() < c2) { pData[j][i] += setRnd() * changeAmpl; } //change
       }
     } else { // immigrant
-      for(var i = 0; i < numPts; i++) { pData[j][i] = Math.random() - 0.5; }
+      for(let i = 0; i < numPts; i++) { pData[j][i] = setRnd(); }
     }
   }
   computeSeries();
@@ -259,8 +277,8 @@ function updateSrs() {
   writeData("#myText", showData, false, true);
 }
 
-var funId = -99;
-var numGen = 1;
+let funId = -99;
+let numGen = 1;
 function startProcess() {
   if(bManExec.state == 1) {
     removeUnfit();
