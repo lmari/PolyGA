@@ -51,28 +51,31 @@ let showData = false;
 let sNumPts, sNumSrs, sNumDel, sCombin, sChange, sChang2, sNumNew;
 let bManExec, bAutoExec, bSetAll, bResetTarget;
 let cShowParams;
+let cStopGen, fStopGen, cStopTarget, fStopTarget;
+
+let lang = "it"; // temporary
 
 $(document).ready(function() {
-  setText('xEvolByStep', 'evolByStep');
-  setText('xEvolFast', 'evolFast');
-  setText('xSetup', 'setup');
-  setText('xNumPts', 'numPts');
-  sNumPts = new _Slider('xxNumPts', '', txt.toolNumPts, 2, 10, 1, defNumPts);
-  setText('xNumSrs', 'numSrs');
-  sNumSrs = new _Slider('xxNumSrs', '', txt.toolNumSrs, 1, 50, 1, defNumSrs);
-  setText('xSelection', 'selection');
-  setText('xNumDel', 'numDel');
-  sNumDel = new _Slider('xxNumDel', '', txt.toolNumDel, 0, numSrs-1, 1, defNumDel);
-  setText('xGeneration', 'generation');
-  setText('xCombin', 'combin');
-  sCombin = new _Slider('xxCombin', '', txt.toolCombin, 0, 50, 10, defCombin);
-  setText('xChange', 'change');
-  sChange = new _Slider('xxChange', '', txt.toolChange, 0, 100, 10, defChange);
-  setText('xChang2', 'chang2');
-  sChang2 = new _Slider('xxChang2', '', txt.toolChang2, 0, 100, 10, defChang2);
-  setText('xImmigration', 'immigration');
-  setText('xNumNew', 'numNew');
-  sNumNew = new _Slider('xxNumNew', '', txt.toolNumNew, 0, numSrs, 1, defNumNew);
+  setText('xEvolByStep', lang, 'evolByStep');
+  setText('xEvolFast', lang, 'evolFast');
+  setText('xSetup', lang, 'setup');
+  setText('xNumPts', lang, 'numPts');
+  sNumPts = new _Slider('xxNumPts', '', getTxt(lang, 'toolNumPts'), 2, 10, 1, defNumPts);
+  setText('xNumSrs', lang, 'numSrs');
+  sNumSrs = new _Slider('xxNumSrs', '', getTxt(lang, 'toolNumSrs'), 1, 50, 1, defNumSrs);
+  setText('xSelection', lang, 'selection');
+  setText('xNumDel', lang, 'numDel');
+  sNumDel = new _Slider('xxNumDel', '', getTxt(lang, 'toolNumDel'), 0, numSrs-1, 1, defNumDel);
+  setText('xGeneration', lang, 'generation');
+  setText('xCombin', lang, 'combin');
+  sCombin = new _Slider('xxCombin', '', getTxt(lang, 'toolCombin'), 0, 50, 10, defCombin);
+  setText('xChange', lang, 'change');
+  sChange = new _Slider('xxChange', '', getTxt(lang, 'toolChange'), 0, 100, 10, defChange);
+  setText('xChang2', lang, 'chang2');
+  sChang2 = new _Slider('xxChang2', '', getTxt(lang, 'toolChang2'), 0, 100, 10, defChang2);
+  setText('xImmigration', lang, 'immigration');
+  setText('xNumNew', lang, 'numNew');
+  sNumNew = new _Slider('xxNumNew', '', getTxt(lang, 'toolNumNew'), 0, numSrs, 1, defNumNew);
 
   sNumPts.onChange(function() {
     numPts = sNumPts.getValue();
@@ -90,24 +93,36 @@ $(document).ready(function() {
   sChang2.onChange(() => chang2 = sChang2.getValue());
   sNumNew.onChange(() => numNew = sNumNew.getValue());
 
-  bManExec = new _Button('xManExec', txt.manExec1, txt.toolManExec);
+  bManExec = new _Button('xManExec', getTxt(lang, 'manExec1'), getTxt(lang, 'toolManExec'));
   bManExec.setActions(() => {
-    enableConfiguration(false); enableTuning(false); selectFit(); }, txt.manExec1,
-    removeUnfit, txt.manExec2,
-    () => { updateSrs(); enableConfiguration(true); enableTuning(true); }, txt.manExec3
+    enableConfiguration(false); enableTuning(false); selectFit(); }, getTxt(lang, 'manExec1'),
+    removeUnfit, getTxt(lang, 'manExec2'),
+    () => { updateSrs(); enableConfiguration(true); enableTuning(true); }, getTxt(lang, 'manExec3')
   );
 
-  bAutoExec = new _Button('xAutoExec', txt.autoExec1, txt.toolAutoExec);
-  bAutoExec.setActions(startProcess, txt.autoExec1, stopProcess, txt.autoExec2);
+  bAutoExec = new _Button('xAutoExec', getTxt(lang, 'autoExec1'), getTxt(lang, 'toolAutoExec'));
+  bAutoExec.setActions(startProcess, getTxt(lang, 'autoExec1'), stopProcess, getTxt(lang, 'autoExec2'));
 
-  bSetAll = new _Button('xSetAll', txt.setAll, txt.toolSetAll);
+  bSetAll = new _Button('xSetAll', getTxt(lang, 'setAll'), getTxt(lang, 'toolSetAll'));
   bSetAll.setAction(setAll);
 
-  bResetTarget = new _Button('xResetTarget', txt.resetTarget, txt.toolResetTarget);
+  bResetTarget = new _Button('xResetTarget', getTxt(lang, 'resetTarget'), getTxt(lang, 'toolResetTarget'));
   bResetTarget.setAction(() => resetTarget(true));
 
-  cShowParams = new _Checkbox('xShowParams', txt.showParams, txt.toolShowParams);
+  cShowParams = new _Checkbox('xShowParams', getTxt(lang, 'showParams'), getTxt(lang, 'toolShowParams'));
   cShowParams.setAction(() => writeData("#myText", showData = cShowParams.isChecked(), false, true));
+
+  cStopGen = new _Checkbox('xStopGen', '', getTxt(lang, 'toolStopGen'));
+  $('#xStopGenT').html(getTxt(lang, 'stopGen'));
+  fStopGen = new _Field('xStopGenF', 3, 100, getTxt(lang, 'toolStopGen'));
+  fStopGen.enable(false);
+  cStopGen.setAction(() => fStopGen.enable(cStopGen.isChecked()));
+
+  cStopTarget = new _Checkbox('xStopTarget', '', getTxt(lang, 'toolStopTarget'));
+  $('#xStopTargetT').html(getTxt(lang, 'stopTarget'));
+  fStopTarget = new _Field('xStopTargetF', 3, 0.01, getTxt(lang, 'toolStopTarget'));
+  fStopTarget.enable(false);
+  cStopTarget.setAction(() => fStopTarget.enable(cStopTarget.isChecked()));
 });
 
 $(function() { $(document).tooltip({
@@ -147,6 +162,11 @@ $(function() { $(document).tooltip({
 
 <table>
   <tr><td id='xSetAll'></td><td id='xResetTarget'></td><td id='xShowParams'></td></tr>
+</table>
+
+<table>
+  <tr><td id='xStopGen'></td><td id='xStopGenT'></td><td id='xStopGenF'></td>
+    <td id='xStopTarget'></td><td id='xStopTargetT'></td><td id='xStopTargetF'></td></tr>
 </table>
 
 <div id="myText" style="position:relative; left:20px;">...</div>

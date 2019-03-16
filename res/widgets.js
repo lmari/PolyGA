@@ -12,6 +12,26 @@ See the GNU General Public License <http://www.gnu.org/licenses/> for more detai
 */
 'use strict';
 
+class _Field {
+  constructor(container, size, defValue, tooltip) {
+    let domEl = '_F_' + _Field.count;
+    $('#' + container).html(`<input id='${domEl}' title='${tooltip}' type='text' size='${size}' value='${defValue}' class='ui-widget ui-state-default ui-corner-all'></input>`);
+    this.domEl = $('#' + domEl);
+    _Field.count++;
+  }
+
+  enable(x) { this.domEl.prop('disabled', !x); }
+
+  getId() { return this.domEl.attr('id'); }
+
+  getValue() { return this.domEl.val(); }
+
+  setValue(value) { this.domEl.val(value); }
+}
+
+_Field.count = 0;
+
+
 class _Button {
   constructor(container, label, tooltip) {
     let domEl = '_B_' + _Button.count;
@@ -64,7 +84,7 @@ class _Checkbox {
 
   setChecked(x) { this.domEl.prop('checked', x); }
 
-  isChecked(x) { return this.domEl.prop('checked'); }
+  isChecked() { return this.domEl.prop('checked'); }
 
   setAction(fun) { this.domEl.on('click', fun); }
 }

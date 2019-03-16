@@ -61,7 +61,7 @@ let selectedAsUnfit = new Array();
 
 function writeData(field, fullShow, withHighlight, wholePop) { //write some data
   let num = wholePop ? numSrs : numSrs - numDel;
-  let txt = `<h3>${getTxt('numGen')}: ${numGen}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${getTxt('medianMSE')}: ${median.toFixed(3)}</h3>`;
+  let txt = `<h3>${getTxt(lang, 'numGen')}: ${numGen}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${getTxt(lang, 'medianMSE')}: ${median.toFixed(3)}</h3>`;
   if(fullShow) {
     //txt += 'x: ' + xData.toString(2) + '<br>';
     txt += `target (params): ${pTarg.toString(3)}<br>`;
@@ -283,11 +283,11 @@ function startProcess() {
   if(bManExec.state == 1) {
     removeUnfit();
     updateSrs();
-    bManExec.setLabel(txt.manExec1);
+    bManExec.setLabel(getTxt(lang, 'manExec1'));
     bManExec.state = 0;
   } else if(bManExec.state == 2) {
       updateSrs();
-      bManExec.setLabel(txt.manExec1);
+      bManExec.setLabel(getTxt(lang, 'manExec1'));
       bManExec.state = 0;
     }
   bManExec.enable(false);
@@ -299,6 +299,13 @@ function startProcess() {
       selectFit();
       removeUnfit();
       updateSrs();
+
+      if((cStopGen.isChecked() && numGen >= Number(fStopGen.getValue()))
+        || (cStopTarget.isChecked() && median <= Number(fStopTarget.getValue()))) {
+        stopProcess();
+        bAutoExec.setLabel(getTxt(lang, 'autoExec1'));
+        bAutoExec.state = 0;
+      }
     }, 100); //frequency of repetition, in ms
   }
 }
