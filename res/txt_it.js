@@ -33,6 +33,7 @@ let txt_IT = {
   stopGen: "Ferma alla generazione", toolStopGen: "Ferma l’evoluzione quando si riaggiunge la generazione stabilita.",
   stopTarget: "Ferma alla distanza dall’obiettivo", toolStopTarget: "Ferma l’evoluzione quando la distanza dall’obiettivo diventa minore del valore stabilito.",
   numGen: "Numero di generazioni", medianMSE: "Distanza media dall'obiettivo",
+  chart: "Il grafico rappresenta gli individui della popolazione (<i>i polinomi</i>) come delle curve rosse e l'obiettivo come una curva verde.",
 };
 
 function getTxt(lang, id) { return txt_IT[id]; }

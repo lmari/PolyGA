@@ -1,5 +1,5 @@
 <!--
-This file is part of PolyGA, made by Luca Mari, 2018-2019. 
+This file is part of PolyGA, made by Luca Mari, 2018-2019.
 
 PolyGA is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -123,6 +123,8 @@ $(document).ready(function() {
   fStopTarget = new _Field('xStopTargetF', 3, 0.01, getTxt(lang, 'toolStopTarget'));
   fStopTarget.enable(false);
   cStopTarget.setAction(() => fStopTarget.enable(cStopTarget.isChecked()));
+
+  $('#myCanvas').attr('title',getTxt(lang, 'chart'));
 });
 
 $(function() { $(document).tooltip({
@@ -148,7 +150,7 @@ $(function() { $(document).tooltip({
 
 <table>
   <tr><td><b id='xSetup'></b></td>
-    <td id='xNumPts'></td><td id='xxNumPts'></td><td id='myHelp' rowspan='7'></td></tr>
+    <td id='xNumPts'></td><td rowspan='7'>&nbsp;&nbsp;</td><td id='xxNumPts'></td><td rowspan='7'>&nbsp;&nbsp;</td><td id='myHelp' rowspan='7'></td></tr>
   <tr><td></td><td id='xNumSrs'></td><td id='xxNumSrs'></td></tr>
   <tr><td><b id='xSelection'></b></td>
     <td id='xNumDel'></td><td id='xxNumDel'></td></tr>
