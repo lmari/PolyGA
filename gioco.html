@@ -1,0 +1,182 @@
+<!--
+This file is part of PolyGA, made by Luca Mari, 2018-2019.
+
+PolyGA is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 2.
+
+PolyGA is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License <http://www.gnu.org/licenses/> for more details.
+-->
+<html>
+<head>
+<script>
+var rem = "PolyGA, made by Luca Mari, 2018-2019.";
+rem += "\n\nIt is free software: you can redistribute it and/or modify it";
+rem += "\nunder the terms of the GNU General Public License";
+rem += "\nas published by the Free Software Foundation, version 2.";
+rem += "\n\nSee a short how-to-use at https://github.com/lmari/GA";
+</script>
+<meta charset="UTF-8">
+<title>PolyGA</title>
+<link rel="stylesheet" href="res/jquery-ui.min.css">
+<script src="res/jquery.min.js"></script>
+<script src="res/jquery-ui.min.js"></script>
+<script src="res/txt_it.js"></script>
+<script src="res/Chart.bundle.min.js"></script>
+<script src="res/utils.js"></script>
+<script src="res/widgets.js"></script>
+<script>
+'use strict';
+//defaults
+const defNumPts = 5;
+const defNumSrs = 10;
+const defNumDel = 0;
+const defCombin = 0;
+const defChange = 0;
+const defChang2 = 0;
+const defNumNew = 0;
+
+let numPts = defNumPts;
+let numSrs = defNumSrs;
+let numDel = defNumDel;
+let combin = defCombin;
+let change = defChange;
+let chang2 = defChang2;
+let numNew = defNumNew;
+let showData = false;
+
+let sNumPts, sNumSrs, sNumDel, sCombin, sChange, sChang2, sNumNew;
+let bManExec, bAutoExec, bSetAll, bResetTarget;
+let cShowParams;
+let cStopGen, fStopGen, cStopTarget, fStopTarget;
+
+let lang = "it"; // temporary
+
+$(document).ready(function() {
+  setText('xEvolByStep', lang, 'evolByStep');
+  setText('xEvolFast', lang, 'evolFast');
+  setText('xSetup', lang, 'setup');
+  setText('xNumPts', lang, 'numPts');
+  sNumPts = new _Slider('xxNumPts', '', getTxt(lang, 'toolNumPts'), 2, 10, 1, defNumPts);
+  setText('xNumSrs', lang, 'numSrs');
+  sNumSrs = new _Slider('xxNumSrs', '', getTxt(lang, 'toolNumSrs'), 1, 50, 1, defNumSrs);
+  setText('xSelection', lang, 'selection');
+  setText('xNumDel', lang, 'numDel');
+  sNumDel = new _Slider('xxNumDel', '', getTxt(lang, 'toolNumDel'), 0, numSrs-1, 1, defNumDel);
+  setText('xGeneration', lang, 'generation');
+  setText('xCombin', lang, 'combin');
+  sCombin = new _Slider('xxCombin', '', getTxt(lang, 'toolCombin'), 0, 50, 10, defCombin);
+  setText('xChange', lang, 'change');
+  sChange = new _Slider('xxChange', '', getTxt(lang, 'toolChange'), 0, 100, 10, defChange);
+  setText('xChang2', lang, 'chang2');
+  sChang2 = new _Slider('xxChang2', '', getTxt(lang, 'toolChang2'), 0, 100, 10, defChang2);
+  setText('xImmigration', lang, 'immigration');
+  setText('xNumNew', lang, 'numNew');
+  sNumNew = new _Slider('xxNumNew', '', getTxt(lang, 'toolNumNew'), 0, numSrs, 1, defNumNew);
+
+  sNumPts.onChange(function() {
+    numPts = sNumPts.getValue();
+    setAll();
+  });
+  sNumSrs.onChange(function() {
+    numSrs = sNumSrs.getValue();
+    sNumDel.setMax(numSrs);
+    sNumNew.setMax(numSrs);
+    setAll();
+  });
+  sNumDel.onChange(() => numDel = sNumDel.getValue());
+  sCombin.onChange(() => combin = sCombin.getValue());
+  sChange.onChange(() => change = sChange.getValue());
+  sChang2.onChange(() => chang2 = sChang2.getValue());
+  sNumNew.onChange(() => numNew = sNumNew.getValue());
+
+  bManExec = new _Button('xManExec', getTxt(lang, 'manExec1'), getTxt(lang, 'toolManExec'));
+  bManExec.setActions(() => {
+    enableConfiguration(false); enableTuning(false); selectFit(); }, getTxt(lang, 'manExec1'),
+    removeUnfit, getTxt(lang, 'manExec2'),
+    () => { updateSrs(); enableConfiguration(true); enableTuning(true); }, getTxt(lang, 'manExec3')
+  );
+
+  bAutoExec = new _Button('xAutoExec', getTxt(lang, 'autoExec1'), getTxt(lang, 'toolAutoExec'));
+  bAutoExec.setActions(startProcess, getTxt(lang, 'autoExec1'), stopProcess, getTxt(lang, 'autoExec2'));
+
+  bSetAll = new _Button('xSetAll', getTxt(lang, 'setAll'), getTxt(lang, 'toolSetAll'));
+  bSetAll.setAction(setAll);
+
+  bResetTarget = new _Button('xResetTarget', getTxt(lang, 'resetTarget'), getTxt(lang, 'toolResetTarget'));
+  bResetTarget.setAction(() => resetTarget(true));
+
+  cShowParams = new _Checkbox('xShowParams', getTxt(lang, 'showParams'), getTxt(lang, 'toolShowParams'));
+  cShowParams.setAction(() => writeData("#myText", showData = cShowParams.isChecked(), false, true));
+
+  cStopGen = new _Checkbox('xStopGen', '', getTxt(lang, 'toolStopGen'));
+  $('#xStopGenT').html(getTxt(lang, 'stopGen'));
+  fStopGen = new _Field('xStopGenF', 3, 100, getTxt(lang, 'toolStopGen'));
+  fStopGen.enable(false);
+  cStopGen.setAction(() => fStopGen.enable(cStopGen.isChecked()));
+
+  cStopTarget = new _Checkbox('xStopTarget', '', getTxt(lang, 'toolStopTarget'));
+  cStopTarget.setChecked(true);
+  $('#xStopTargetT').html(getTxt(lang, 'stopTarget'));
+  fStopTarget = new _Field('xStopTargetF', 3, 0.01, getTxt(lang, 'toolStopTarget'));
+  fStopTarget.enable(true);
+  cStopTarget.setAction(() => fStopTarget.enable(cStopTarget.isChecked()));
+
+  $('#myCanvas').attr('title',getTxt(lang, 'chart'));
+});
+
+$(function() { $(document).tooltip({
+  position: { my: "left top", at: "left top", collision: "fit", of: "#myHelp", within: "#myHelp" },
+  show: { effect: "scale", delay: 250 },
+  hide: { effect: "blind", delay: 250 },
+  content: function() { return this.getAttribute("title"); }
+}); });
+</script>
+</head>
+<body>
+<h1>PolyGA: un esempio di Algoritmo Genetico
+<a href="javascript:window.alert(rem);">[?]</a>
+</h1>
+<table>
+  <tr><td><b id='xEvolByStep'></b></td><td id='xManExec'></td>
+  <td>&nbsp;&nbsp;&nbsp;<b id='xEvolFast'></b></td><td id='xAutoExec'></td></tr>
+</table>
+
+<div style="position:relative; left:10px; width:600px;">
+  <canvas id="myCanvas" style="border:2px solid #FF9933;"></canvas>
+</div>
+
+<table>
+  <tr><td><b id='xSetup'></b></td>
+    <td id='xNumPts'></td><td rowspan='7'>&nbsp;&nbsp;</td><td id='xxNumPts'></td><td rowspan='7'>&nbsp;&nbsp;</td><td id='myHelp' rowspan='7'></td></tr>
+  <tr><td></td><td id='xNumSrs'></td><td id='xxNumSrs'></td></tr>
+  <tr><td><b id='xSelection'></b></td>
+    <td id='xNumDel'></td><td id='xxNumDel'></td></tr>
+  <tr><td><b id='xGeneration'></b></td>
+    <td id='xCombin'></td><td id='xxCombin'></td></tr>
+  <tr><td></td><td id='xChange'></td><td id='xxChange'></td></tr>
+  <tr><td></td><td id='xChang2'></td><td id='xxChang2'></td></tr>
+  <tr><td><b id='xImmigration'></b></td>
+    <td id='xNumNew'></td><td id='xxNumNew'></td></tr>
+</table>
+
+<table>
+  <tr><td id='xSetAll'></td><td id='xResetTarget'></td><td>&nbsp;&nbsp;</td><td id='xShowParams'></td></tr>
+</table>
+
+<table>
+  <tr><td id='xStopGen'></td><td id='xStopGenT'></td><td id='xStopGenF'></td><td>&nbsp;&nbsp;</td>
+    <td id='xStopTarget'></td><td id='xStopTargetT'></td><td id='xStopTargetF'></td></tr>
+</table>
+
+<div id="myText" style="position:relative; left:20px;">...</div>
+
+<script>
+var ctx = $("#myCanvas");
+setAll();
+</script>
+</body>
+</html>
