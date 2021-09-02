@@ -2,7 +2,7 @@
 This is a simple html5 + js application for experimenting with the implementation of a <a href="https://en.wikipedia.org/wiki/Genetic_algorithm" target="_blank">genetic algorithm</a> for polynomial interpolation.
 It exploits <a href="https://jquery.com">jQuery</a> / <a href="https://jqueryui.com">jQueryUI</a> and <a href="https://www.chartjs.org/">chart.js</a>, and should run on any sufficiently new browser.
 
-**Run it <a href="https://lmari.github.com/PolyGA/GA.html" target="_blank">here</a>**.
+**Run it <a href="https://lmari.github.io/PolyGA/GA.html" target="_blank">here</a>**.
 
 This is a short explanation of what can be set up via the control panel of the application (currently the UI is in Italian only).
 * _#genes_ (integer from 2 to 10): number of genes of each individual / points of the polynomials / of parameters of the polynomials (= 1 + order of the polynomials)
